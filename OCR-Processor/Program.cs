@@ -9,6 +9,7 @@ class Program
 {
 	static async Task Main(string[] args)
 	{
+		LocalAIHelpers localAI = new LocalAIHelpers("C:\\Users\\Denilson\\Downloads\\tinyllama-1.1b-chat-v0.3.Q2_K.gguf");
 		Console.WriteLine("Enter the file path of the document (image or PDF):");
 		string filePath = Console.ReadLine();
 		AIHelper aiHelpers = new AIHelper();
@@ -59,9 +60,10 @@ class Program
 
 			string jsonOutput = JsonConvert.SerializeObject(jsonObject, Formatting.Indented);
 			Console.WriteLine("\nExtracted Text in JSON Format:\n");
-			var airesponse = await aiHelpers.ProcessText(jsonOutput);
-			Console.WriteLine($"AI Says: {airesponse}");
+			//var airesponse = await aiHelpers.ProcessText(jsonOutput);
+			//Console.WriteLine($"AI Says: {airesponse}");
 			Console.WriteLine(jsonOutput);
+			await localAI.ProcessModel(jsonOutput);
 		}
 		catch (Exception ex)
 		{

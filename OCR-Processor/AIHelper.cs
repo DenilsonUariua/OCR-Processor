@@ -52,5 +52,7 @@ namespace OCR_Processor
 				return result.GetProperty("choices")[0].GetProperty("text").ToString().Trim();
 			}
 		}
+
+
 	}
 }
