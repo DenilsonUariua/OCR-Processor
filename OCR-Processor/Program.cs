@@ -3,14 +3,15 @@ using Newtonsoft.Json;
 using Spire.Pdf;
 using System;
 using System.IO;
+using OCR_Processor;
 
 class Program
 {
-	static void Main(string[] args)
+	static async Task Main(string[] args)
 	{
 		Console.WriteLine("Enter the file path of the document (image or PDF):");
 		string filePath = Console.ReadLine();
-
+		AIHelper aiHelpers = new AIHelper();
 		if (string.IsNullOrWhiteSpace(filePath))
 		{
 			Console.WriteLine("File path cannot be empty. Exiting...");
@@ -58,6 +59,8 @@ class Program
 
 			string jsonOutput = JsonConvert.SerializeObject(jsonObject, Formatting.Indented);
 			Console.WriteLine("\nExtracted Text in JSON Format:\n");
+			var airesponse = await aiHelpers.ProcessText(jsonOutput);
+			Console.WriteLine($"AI Says: {airesponse}");
 			Console.WriteLine(jsonOutput);
 		}
 		catch (Exception ex)
