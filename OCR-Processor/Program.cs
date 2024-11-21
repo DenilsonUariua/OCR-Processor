@@ -9,9 +9,10 @@ class Program
 {
 	static async Task Main(string[] args)
 	{
-		LocalAIHelpers localAI = new LocalAIHelpers("C:\\Users\\Denilson\\Downloads\\tinyllama-1.1b-chat-v0.3.Q2_K.gguf");
+		LocalAIHelpers localAI = new LocalAIHelpers("C:\\Users\\Denilson\\Downloads\\tinyllama-1.1b-chat-v1.0.Q5_K_M.gguf");
 		Console.WriteLine("Enter the file path of the document (image or PDF):");
-		string filePath = Console.ReadLine();
+
+		string filePath = "C:\\Users\\Denilson\\Downloads\\pdfs\\test5.pdf";
 		AIHelper aiHelpers = new AIHelper();
 		if (string.IsNullOrWhiteSpace(filePath))
 		{
@@ -63,7 +64,8 @@ class Program
 			//var airesponse = await aiHelpers.ProcessText(jsonOutput);
 			//Console.WriteLine($"AI Says: {airesponse}");
 			Console.WriteLine(jsonOutput);
-			await localAI.ProcessModel(jsonOutput);
+			var processedResult = await localAI.ProcessModelAsync(jsonOutput);
+			Console.WriteLine($"AI Says: {processedResult}");
 		}
 		catch (Exception ex)
 		{
