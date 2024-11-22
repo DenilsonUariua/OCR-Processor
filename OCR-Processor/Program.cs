@@ -9,10 +9,10 @@ class Program
 {
 	static async Task Main(string[] args)
 	{
-		LocalAIHelpers localAI = new LocalAIHelpers("C:\\Users\\Denilson\\Downloads\\tinyllama-1.1b-chat-v1.0.Q5_K_M.gguf");
+		LocalAIHelpers localAI = new LocalAIHelpers("C:\\Users\\Denilson\\Downloads\\mistral-7b-instruct-v0.1.Q2_K.gguf");
 		Console.WriteLine("Enter the file path of the document (image or PDF):");
 
-		string filePath = "C:\\Users\\Denilson\\Downloads\\pdfs\\test5.pdf";
+		string filePath = "C:\\Users\\Denilson\\Downloads\\test18.jpg";
 		AIHelper aiHelpers = new AIHelper();
 		if (string.IsNullOrWhiteSpace(filePath))
 		{
