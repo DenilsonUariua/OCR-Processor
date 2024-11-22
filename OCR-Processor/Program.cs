@@ -4,14 +4,12 @@ using Spire.Pdf;
 using System;
 using System.IO;
 using OCR_Processor;
-
 class Program
 {
 	static async Task Main(string[] args)
 	{
-		LocalAIHelpers localAI = new LocalAIHelpers("C:\\Users\\Denilson\\Downloads\\tinyllama-1.1b-chat-v1.0.Q5_K_M.gguf");
+		LocalAIHelpers localAI = new LocalAIHelpers("C:\\Users\\Denilson\\Downloads\\llama-2-7b-chat.Q5_K_M.gguf");
 		Console.WriteLine("Enter the file path of the document (image or PDF):");
-
 		string filePath = "C:\\Users\\Denilson\\Downloads\\pdfs\\test5.pdf";
 		AIHelper aiHelpers = new AIHelper();
 		if (string.IsNullOrWhiteSpace(filePath))
@@ -19,19 +17,15 @@ class Program
 			Console.WriteLine("File path cannot be empty. Exiting...");
 			return;
 		}
-
 		if (!File.Exists(filePath))
 		{
 			Console.WriteLine("File not found. Please provide a valid path.");
 			return;
 		}
-
 		string extractedText = string.Empty;
-
 		try
 		{
 			string imagePath = filePath;
-
 			// If the file is a PDF, convert its first page to an image
 			if (Path.GetExtension(filePath).Equals(".pdf", StringComparison.OrdinalIgnoreCase))
 			{
@@ -39,7 +33,6 @@ class Program
 				imagePath = ConvertPdfToImage(filePath, "temp.jpg");
 				Console.WriteLine("PDF converted to image: " + imagePath);
 			}
-
 			// Process the image with Tesseract
 			using (var engine = new TesseractEngine(@"./tessdata", "eng", EngineMode.Default))
 			{
@@ -51,14 +44,12 @@ class Program
 					}
 				}
 			}
-
 			// Convert extracted text to JSON
 			var jsonObject = new
 			{
 				OriginalText = extractedText,
 				ExtractedLines = extractedText.Split(Environment.NewLine)
 			};
-
 			string jsonOutput = JsonConvert.SerializeObject(jsonObject, Formatting.Indented);
 			Console.WriteLine("\nExtracted Text in JSON Format:\n");
 			//var airesponse = await aiHelpers.ProcessText(jsonOutput);
@@ -73,7 +64,6 @@ class Program
 			Console.WriteLine("Ensure the file path is correct and the file is accessible.");
 		}
 	}
-
 	// Converts the first page of a PDF to an image (JPEG) using Spire.PDF
 	static string ConvertPdfToImage(string pdfPath, string outputImagePath)
 	{
@@ -81,14 +71,11 @@ class Program
 		{
 			// Load the PDF document
 			pdfDocument.LoadFromFile(pdfPath);
-
 			// Render the first page to an image
 			var image = pdfDocument.SaveAsImage(0, 300, 300); // 300 DPI for quality
-
-			// Save the image as a JPEG
+															  // Save the image as a JPEG
 			image.Save(outputImagePath, System.Drawing.Imaging.ImageFormat.Jpeg);
 		}
-
 		return outputImagePath;
 	}
 }
