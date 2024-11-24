@@ -1,19 +1,20 @@
 ﻿using Tesseract;
-using Newtonsoft.Json;
 using Spire.Pdf;
-using System;
-using System.IO;
-using OCR_Processor;
+using LangChain.Providers.HuggingFace;
+using OCR_Processor.Controllers;
+using static OCR_Processor.Controllers.RobertaExtractiveQA;
 
 class Program
 {
 	static async Task Main(string[] args)
 	{
-		LocalAIHelpers localAI = new LocalAIHelpers("C:\\Users\\Denilson\\Downloads\\mistral-7b-instruct-v0.1.Q2_K.gguf");
-		Console.WriteLine("Enter the file path of the document (image or PDF):");
+		using var client = new HttpClient();
+		string apiToken = "hugging_face_api_key_here";
+		var provider = new HuggingFaceProvider(apiKey: apiToken, client);
 
-		string filePath = "C:\\Users\\Denilson\\Downloads\\test18.jpg";
-		AIHelper aiHelpers = new AIHelper();
+		Console.WriteLine("Enter the file path of the document (image or PDF):");
+		string filePath = "file_path_of_the_document";
+
 		if (string.IsNullOrWhiteSpace(filePath))
 		{
 			Console.WriteLine("File path cannot be empty. Exiting...");
@@ -40,7 +41,7 @@ class Program
 				Console.WriteLine("PDF converted to image: " + imagePath);
 			}
 
-			// Process the image with Tesseract
+			// Process the image with Tesseract OCR to extract text
 			using (var engine = new TesseractEngine(@"./tessdata", "eng", EngineMode.Default))
 			{
 				using (var img = Pix.LoadFromFile(imagePath))
@@ -52,20 +53,32 @@ class Program
 				}
 			}
 
-			// Convert extracted text to JSON
-			var jsonObject = new
-			{
-				OriginalText = extractedText,
-				ExtractedLines = extractedText.Split(Environment.NewLine)
-			};
+			// This handle the document classification using the extracted text
+			BartZeroShotClassification bartClassifier = new BartZeroShotClassification(provider);
+			List<string > categories = new List<string> { "Identity Document", "Financial Document", "Legal Document", "Other" };
+			var classificationResult = await bartClassifier.ClassifyAsync(extractedText, categories, true );
+			
+			// Prints out the classification of the document and its score
+			Console.WriteLine($"It is a : {classificationResult.Labels[0]}, Score: {classificationResult.Scores[0]}");
 
-			string jsonOutput = JsonConvert.SerializeObject(jsonObject, Formatting.Indented);
-			Console.WriteLine("\nExtracted Text in JSON Format:\n");
-			//var airesponse = await aiHelpers.ProcessText(jsonOutput);
-			//Console.WriteLine($"AI Says: {airesponse}");
-			Console.WriteLine(jsonOutput);
-			var processedResult = await localAI.ProcessModelAsync(jsonOutput);
-			Console.WriteLine($"AI Says: {processedResult}");
+			// This handles the question-answering using the extracted text
+			RobertaExtractiveQA qaSystem = new RobertaExtractiveQA(provider);
+
+			await qaSystem.WarmUpAsync();
+
+			var documents = CreateDocuments(new List<string>
+		{
+			extractedText,
+
+		});
+            Console.WriteLine("Enter your question: ");
+            string question = Console.ReadLine();
+
+			//function that does the question-answering
+			QuestionAnswer answer = await qaSystem.AnswerQuestionAsync(question, documents);
+
+			Console.WriteLine($"Answer: {answer.Answer}, Score: {answer.Score}");
+
 		}
 		catch (Exception ex)
 		{

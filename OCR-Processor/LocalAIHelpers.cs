@@ -44,9 +44,8 @@ namespace OCR_Processor
 					MaxTokens = 600
 				};
 				string result = string.Empty;
-				prompt = prompt + "The information above is extacted from a document using the ocr tool tasseract."+
-					" Classify the provided document into a class of documents: Identity Document, Financial Document, or Legal Document."+
-					" Do not provide reasons for your classification";
+				prompt = prompt + "Classify the provided document into one of the following categories: Identity Document, "+
+					"Financial Document, or Legal Document. Return only the category name as the output, without any explanation or reasoning";
 				int counter = 0;
 				while (counter < 2)
 				{
@@ -57,8 +56,11 @@ namespace OCR_Processor
 					}
 
 					Console.ForegroundColor = ConsoleColor.Green;
-					prompt = "Return only a json as a string include important information in this json such as names, contact information, dates or any important information contained that is found in document as well as the class of the document:"+
-						" Identity Document, Financial Document, or Legal Document. Return only the JSON ";
+					prompt = "Analyze the provided document and extract all relevant important information, "+
+						"such as names, contact information, dates, and any other key details. Classify the document" +
+						" into one of the following categories: Identity Document, Financial Document, or Legal Document."+
+						" Return the output as a JSON object containing the extracted information along with the document class."+ 
+						"Do not include any additional explanations or reasoning. ";
 					counter++;
 					Console.ForegroundColor = ConsoleColor.White;
 				}
