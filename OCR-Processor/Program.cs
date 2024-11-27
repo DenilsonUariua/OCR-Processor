@@ -1,8 +1,8 @@
 ﻿using Tesseract;
-using Spire.Pdf;
-using PdfSharp;
 using LangChain.Providers.HuggingFace;
 using static OCR_Processor.Controllers.PDFToImageConverter;
+using static OCR_Processor.Controllers.RobertaExtractiveQA;
+using OCR_Processor.Controllers;
 
 class Program
 {
@@ -35,7 +35,7 @@ class Program
 			if (Path.GetExtension(filePath).Equals(".pdf", StringComparison.OrdinalIgnoreCase))
 			{
 				Console.WriteLine("PDF detected. Converting all pages to images...");
-				List<string> imagePaths = ConvertPdfToImages(filePath);
+				List<string> imagePaths =  ConvertPdfToImages(filePath);
 				Console.WriteLine($"PDF converted to {imagePaths.Count} images");
 
 				// Process each image with Tesseract OCR
@@ -60,30 +60,30 @@ class Program
 
 			Console.WriteLine($"Extracted text is: {combinedText}");
 
-			//// Document Classification
-			//BartZeroShotClassification bartClassifier = new BartZeroShotClassification(provider);
-			//List<string> categories = new List<string> { "Identity Document", "Financial Document", "Legal Document", "Other" };
-			//var classificationResult = await bartClassifier.ClassifyAsync(combinedText, categories, true);
+			// Document Classification
+			BartZeroShotClassification bartClassifier = new BartZeroShotClassification(provider);
+			List<string> categories = new List<string> { "Identity Document", "Financial Document", "Legal Document", "Other" };
+			var classificationResult = await bartClassifier.ClassifyAsync(combinedText, categories, true);
 
-			//Console.WriteLine($"Document Classification: {classificationResult.Labels[0]}, Score: {classificationResult.Scores[0]}");
+			Console.WriteLine($"Document Classification: {classificationResult.Labels[0]}, Score: {classificationResult.Scores[0]}");
 
-			//// Question Answering Setup
-			//RobertaExtractiveQA qaSystem = new RobertaExtractiveQA(provider);
-			//await qaSystem.WarmUpAsync();
-			//var documents = CreateDocuments(new List<string> { combinedText });
+			// Question Answering Setup
+			RobertaExtractiveQA qaSystem = new RobertaExtractiveQA(provider);
+			await qaSystem.WarmUpAsync();
+			var documents = CreateDocuments(new List<string> { combinedText });
 
-			//// Interactive Q&A loop
-			//while (true)
-			//{
-			//	Console.WriteLine("Enter your question (or 'exit' to quit): ");
-			//	string question = Console.ReadLine();
+			// Interactive Q&A loop
+			while (true)
+			{
+				Console.WriteLine("Enter your question (or 'exit' to quit): ");
+				string question = Console.ReadLine();
 
-			//	if (question.ToLower() == "exit")
-			//		break;
+				if (question.ToLower() == "exit")
+					break;
 
-			//	QuestionAnswer answer = await qaSystem.AnswerQuestionAsync(question, documents);
-			//	Console.WriteLine($"Answer: {answer.Answer}, Score: {answer.Score}");
-			//}
+				QuestionAnswer answer = await qaSystem.AnswerQuestionAsync(question, documents);
+				Console.WriteLine($"Answer: {answer.Answer}, Score: {answer.Score}");
+			}
 		}
 		catch (Exception ex)
 		{
