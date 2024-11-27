@@ -17,11 +17,6 @@ namespace OCR_Processor.Controllers
 
 		}
 
-		public async Task WarmUpAsync()
-		{
-			Console.WriteLine("Warming up the model...");
-			// No specific warm-up endpoint for Haystack; optional based on API design.
-		}
 
 		public async Task<QuestionAnswer> AnswerQuestionAsync(string question, List<Document> documents)
 		{

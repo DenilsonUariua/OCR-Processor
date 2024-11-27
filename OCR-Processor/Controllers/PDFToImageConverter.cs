@@ -1,5 +1,4 @@
 ﻿using ImageMagick;
-using Spire.Additions.Xps.Schema;
 using System;
 using System.Collections.Generic;
 using System.IO;

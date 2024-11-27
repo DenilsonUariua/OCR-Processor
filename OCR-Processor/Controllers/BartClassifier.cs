@@ -59,7 +59,7 @@ namespace OCR_Processor.Controllers
 				else
 				{
 					Console.WriteLine($"Error: {response.ReasonPhrase}");
-					return null;
+					throw new Exception(response.ReasonPhrase);
 				}
 			}
 			catch (Exception ex)

@@ -69,7 +69,6 @@ class Program
 
 			// Question Answering Setup
 			RobertaExtractiveQA qaSystem = new RobertaExtractiveQA(provider);
-			await qaSystem.WarmUpAsync();
 			var documents = CreateDocuments(new List<string> { combinedText });
 
 			// Interactive Q&A loop
