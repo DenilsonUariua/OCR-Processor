@@ -10,9 +10,12 @@
 
   <ItemGroup>
     <PackageReference Include="LangChain" Version="0.15.2" />
+    <PackageReference Include="LeptonicaSharp" Version="1.77.0.1" />
     <PackageReference Include="LLamaSharp" Version="0.19.0" />
     <PackageReference Include="LLamaSharp.Backend.Cpu" Version="0.19.0" />
+    <PackageReference Include="Magick.NET-Q8-AnyCPU" Version="14.2.0" />
     <PackageReference Include="Newtonsoft.Json" Version="13.0.3" />
+    <PackageReference Include="PDFsharp" Version="6.1.1" />
     <PackageReference Include="Spire.PDF" Version="10.11.1" />
     <PackageReference Include="Tesseract" Version="5.2.0" />
   </ItemGroup>

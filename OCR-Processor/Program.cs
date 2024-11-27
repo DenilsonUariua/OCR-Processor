@@ -1,19 +1,19 @@
 ﻿using Tesseract;
 using Spire.Pdf;
+using PdfSharp;
 using LangChain.Providers.HuggingFace;
-using OCR_Processor.Controllers;
-using static OCR_Processor.Controllers.RobertaExtractiveQA;
+using static OCR_Processor.Controllers.PDFToImageConverter;
 
 class Program
 {
 	static async Task Main(string[] args)
 	{
 		using var client = new HttpClient();
-		string apiToken = "hugging_face_api_key_here";
+		string apiToken = "test_token";
 		var provider = new HuggingFaceProvider(apiKey: apiToken, client);
 
 		Console.WriteLine("Enter the file path of the document (image or PDF):");
-		string filePath = "file_path_of_the_document";
+		string filePath = Path.Combine("C:", "Users", "Denilson", "Downloads", "otjiherero stuff" , "dict.pdf");
 
 		if (string.IsNullOrWhiteSpace(filePath))
 		{
@@ -27,58 +27,63 @@ class Program
 			return;
 		}
 
-		string extractedText = string.Empty;
+		List<string> extractedTexts = new List<string>();
 
 		try
 		{
-			string imagePath = filePath;
-
-			// If the file is a PDF, convert its first page to an image
+			// Check if the file is a PDF
 			if (Path.GetExtension(filePath).Equals(".pdf", StringComparison.OrdinalIgnoreCase))
 			{
-				Console.WriteLine("PDF detected. Converting the first page to an image...");
-				imagePath = ConvertPdfToImage(filePath, "temp.jpg");
-				Console.WriteLine("PDF converted to image: " + imagePath);
-			}
+				Console.WriteLine("PDF detected. Converting all pages to images...");
+				List<string> imagePaths = ConvertPdfToImages(filePath);
+				Console.WriteLine($"PDF converted to {imagePaths.Count} images");
 
-			// Process the image with Tesseract OCR to extract text
-			using (var engine = new TesseractEngine(@"./tessdata", "eng", EngineMode.Default))
-			{
-				using (var img = Pix.LoadFromFile(imagePath))
+				// Process each image with Tesseract OCR
+				foreach (var imagePath in imagePaths)
 				{
-					using (var page = engine.Process(img))
-					{
-						extractedText = page.GetText();
-					}
+					string pageText = ExtractTextFromImage(imagePath);
+					extractedTexts.Add(pageText);
+
+					// Optional: Clean up temporary image files
+					File.Delete(imagePath);
 				}
 			}
+			else
+			{
+				// If it's not a PDF, process the single image
+				string pageText = ExtractTextFromImage(filePath);
+				extractedTexts.Add(pageText);
+			}
 
-			// This handle the document classification using the extracted text
-			BartZeroShotClassification bartClassifier = new BartZeroShotClassification(provider);
-			List<string > categories = new List<string> { "Identity Document", "Financial Document", "Legal Document", "Other" };
-			var classificationResult = await bartClassifier.ClassifyAsync(extractedText, categories, true );
-			
-			// Prints out the classification of the document and its score
-			Console.WriteLine($"It is a : {classificationResult.Labels[0]}, Score: {classificationResult.Scores[0]}");
+			// Combine all extracted texts for classification and Q&A
+			string combinedText = string.Join("\n\n", extractedTexts);
 
-			// This handles the question-answering using the extracted text
-			RobertaExtractiveQA qaSystem = new RobertaExtractiveQA(provider);
+			Console.WriteLine($"Extracted text is: {combinedText}");
 
-			await qaSystem.WarmUpAsync();
+			//// Document Classification
+			//BartZeroShotClassification bartClassifier = new BartZeroShotClassification(provider);
+			//List<string> categories = new List<string> { "Identity Document", "Financial Document", "Legal Document", "Other" };
+			//var classificationResult = await bartClassifier.ClassifyAsync(combinedText, categories, true);
 
-			var documents = CreateDocuments(new List<string>
-		{
-			extractedText,
+			//Console.WriteLine($"Document Classification: {classificationResult.Labels[0]}, Score: {classificationResult.Scores[0]}");
 
-		});
-            Console.WriteLine("Enter your question: ");
-            string question = Console.ReadLine();
+			//// Question Answering Setup
+			//RobertaExtractiveQA qaSystem = new RobertaExtractiveQA(provider);
+			//await qaSystem.WarmUpAsync();
+			//var documents = CreateDocuments(new List<string> { combinedText });
 
-			//function that does the question-answering
-			QuestionAnswer answer = await qaSystem.AnswerQuestionAsync(question, documents);
+			//// Interactive Q&A loop
+			//while (true)
+			//{
+			//	Console.WriteLine("Enter your question (or 'exit' to quit): ");
+			//	string question = Console.ReadLine();
 
-			Console.WriteLine($"Answer: {answer.Answer}, Score: {answer.Score}");
+			//	if (question.ToLower() == "exit")
+			//		break;
 
+			//	QuestionAnswer answer = await qaSystem.AnswerQuestionAsync(question, documents);
+			//	Console.WriteLine($"Answer: {answer.Answer}, Score: {answer.Score}");
+			//}
 		}
 		catch (Exception ex)
 		{
@@ -87,21 +92,19 @@ class Program
 		}
 	}
 
-	// Converts the first page of a PDF to an image (JPEG) using Spire.PDF
-	static string ConvertPdfToImage(string pdfPath, string outputImagePath)
+	
+	// Extract text from a single image using Tesseract
+	static string ExtractTextFromImage(string imagePath)
 	{
-		using (PdfDocument pdfDocument = new PdfDocument())
+		using (var engine = new TesseractEngine(@"./tessdata", "eng", EngineMode.Default))
 		{
-			// Load the PDF document
-			pdfDocument.LoadFromFile(pdfPath);
-
-			// Render the first page to an image
-			var image = pdfDocument.SaveAsImage(0, 300, 300); // 300 DPI for quality
-
-			// Save the image as a JPEG
-			image.Save(outputImagePath, System.Drawing.Imaging.ImageFormat.Jpeg);
+			using (var img = Pix.LoadFromFile(imagePath))
+			{
+				using (var page = engine.Process(img))
+				{
+					return page.GetText();
+				}
+			}
 		}
-
-		return outputImagePath;
 	}
 }
