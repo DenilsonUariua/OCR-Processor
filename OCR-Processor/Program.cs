@@ -9,11 +9,11 @@ class Program
 	static async Task Main(string[] args)
 	{
 		using var client = new HttpClient();
-		string apiToken = "test_token";
+		string apiToken = "token....";
 		var provider = new HuggingFaceProvider(apiKey: apiToken, client);
 
 		Console.WriteLine("Enter the file path of the document (image or PDF):");
-		string filePath = Path.Combine("C:", "Users", "Denilson", "Downloads", "otjiherero stuff" , "dict.pdf");
+		string filePath = Path.Combine("C:", "Users", "Denilson", "Downloads", "pdfs" , "test66.png");
 
 		if (string.IsNullOrWhiteSpace(filePath))
 		{
@@ -61,27 +61,27 @@ class Program
 
 			// Document Classification
 			BartZeroShotClassification bartClassifier = new BartZeroShotClassification(provider);
-			List<string> categories = new List<string> { "Identity Document", "Financial Document", "Legal Document", "Other" };
+			List<string> categories = new List<string> { "Identity Document", "Financial Document", "Legal Document", "Offer Migration Contract", "Other" };
 			var classificationResult = await bartClassifier.ClassifyAsync(combinedText, categories, true);
 
 			Console.WriteLine($"Document Classification: {classificationResult.Labels[0]}, Score: {classificationResult.Scores[0]}");
 
-			// Question Answering Setup
-			RobertaExtractiveQA qaSystem = new RobertaExtractiveQA(provider);
-			var documents = CreateDocuments(new List<string> { combinedText });
+			//// Question Answering Setup
+			//RobertaExtractiveQA qaSystem = new RobertaExtractiveQA(provider);
+			//var documents = CreateDocuments(new List<string> { combinedText });
 
-			// Interactive Q&A loop
-			while (true)
-			{
-				Console.WriteLine("Enter your question (or 'exit' to quit): ");
-				string question = Console.ReadLine();
+			//// Interactive Q&A loop
+			//while (true)
+			//{
+			//	Console.WriteLine("Enter your question (or 'exit' to quit): ");
+			//	string question = Console.ReadLine();
 
-				if (question.ToLower() == "exit")
-					break;
+			//	if (question.ToLower() == "exit")
+			//		break;
 
-				QuestionAnswer answer = await qaSystem.AnswerQuestionAsync(question, documents);
-				Console.WriteLine($"Answer: {answer.Answer}, Score: {answer.Score}");
-			}
+			//	QuestionAnswer answer = await qaSystem.AnswerQuestionAsync(question, documents);
+			//	Console.WriteLine($"Answer: {answer.Answer}, Score: {answer.Score}");
+			//}
 		}
 		catch (Exception ex)
 		{

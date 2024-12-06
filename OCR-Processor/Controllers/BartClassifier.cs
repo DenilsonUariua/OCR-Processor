@@ -46,7 +46,7 @@ namespace OCR_Processor.Controllers
 				if (response.IsSuccessStatusCode)
 				{
 					var jsonResponse = await response.Content.ReadAsStringAsync();
-                    Console.WriteLine($"Res: {response.StatusCode} {jsonResponse}");
+                   
                     var result = JsonSerializer.Deserialize<ZeroShotClassificationResult>(jsonResponse);
 					//find the index of the highest score and return the corresponding label
 					var maxIndex = result.Scores.IndexOf(result.Scores.Max());
