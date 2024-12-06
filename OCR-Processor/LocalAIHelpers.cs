@@ -44,10 +44,8 @@ namespace OCR_Processor
 					MaxTokens = 600
 				};
 				string result = string.Empty;
-				prompt = prompt + "The provided data is from a document that has been OCR'd using tessaract and has been converted to text as a string." +
-					"I want to use AI to do classification of documents and extract important information from them." +
-					". Classify the provided document into a class of documents: Identity Document, Financial Document, or Legal Document." +
-					" Do not provide reasons for your classification";
+				prompt = prompt + "Classify the provided document into one of the following categories: Identity Document, "+
+					"Financial Document, or Legal Document. Return only the category name as the output, without any explanation or reasoning";
 				int counter = 0;
 				while (counter < 2)
 				{
@@ -58,10 +56,11 @@ namespace OCR_Processor
 					}
 
 					Console.ForegroundColor = ConsoleColor.Green;
-					prompt = "Return only a JSON as a string containing information contained in the document such as names, addresses, phone numbers," +
-						" dates and any important numbers as fields as well as the class of the document as a field on the JSON: Identity Document, Financial Document," +
-						" or Legal Document. Please Capture all of the information on the document in the JSON." +
-						"Only return class the document belongs to classify the document based on the information it contains";
+					prompt = "Analyze the provided document and extract all relevant important information, "+
+						"such as names, contact information, dates, and any other key details. Classify the document" +
+						" into one of the following categories: Identity Document, Financial Document, or Legal Document."+
+						" Return the output as a JSON object containing the extracted information along with the document class."+ 
+						"Do not include any additional explanations or reasoning. ";
 					counter++;
 					Console.ForegroundColor = ConsoleColor.White;
 				}
